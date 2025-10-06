@@ -125,9 +125,47 @@ zorirental_df
 ## Short descriptive paragraph 
 Overall, rental prices are increasing across all boroughs in New York from the years 2015 to 2024. The borough that experienced the steepest increase in rental prices is Manhatten with a rent increase of 1056.398, followed by the Bronx with an incrwase of 737.301. This could potentially be due to reasons such as increasing gentrification, inflation or the general appeal to bein close proximity to Manhatten due to the availability of employment opportunities. 
 
-Zip code rental plot
+Zip code rental plot all available years 
 ```{r}
 zipcoderental_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
+  janitor::clean_names() |>
+   pivot_longer (
+  cols = x2015_01_31:x2024_08_31,
+    names_to = "date",
+    values_to ="zori",
+    names_prefix ="x") |>
+  separate(date, into = c("year", "month", "day"), sep = "_") |>
+  mutate (year = as.integer(year),
+          month = month.name [as.numeric (month)])|>
+  drop_na(zori)|>
+  select(zori,year,month,region_name,county_name)|>
+  group_by(month,region_name, county_name)
+
+  ggplot(zipcoderental_df, aes(x = year, y = zori, group = region_name, color = county_name))+
+         geom_line (alpha = 0.6)+
+         labs(
+           title = "NYC Rental Prices within Zip Code Across Years",
+           x = "Year",
+           y = "Rental Price",
+           color = "Borough")
+  
+"I don't get a plot if I do it the following way like shown in lecture, why:"
+zipcoderentalplot =
+  zipcoderental_df|>
+ggplot(aes(x = year, y = zori, group = region_name, color = county_name))+
+         geom_line (alpha = 0.6)+
+         labs(
+           title = "NYC Rental Prices within Zip Code Across Years",
+           x = "Year",
+           y = "Rental Price",
+           color = "Borough")
+```
+## Short Descriptive Paragraph (on significant elements. double check graph before writing)
+
+
+Zip code rental plot over each month in 2023
+```{r}
+zipcoderental2023_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
   janitor::clean_names() |>
    pivot_longer (
   cols = x2015_01_31:x2024_08_31,
@@ -143,7 +181,8 @@ zipcoderental_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_
   group_by(month,region_name, county_name) |>
   summarise(mean_value = mean(zori), na.rm = TRUE)
 
-ggplot(zipcoderental_df, (aes(x = month, y = mean_value, group = region_name, color = county_name)))+
+zipcoderental2023plot=
+  ggplot(zipcoderental2023_df, (aes(x = month, y = mean_value, group = region_name, color = county_name)))+
          geom_line (alpha = 0.6)+
          labs(
            title = "NYC Rental Prices by Zip Code Across Months in 2023",
@@ -153,9 +192,89 @@ ggplot(zipcoderental_df, (aes(x = month, y = mean_value, group = region_name, co
 
 
 
-zipcoderental_df
+zipcoderental2023plot
 ```
 ## Short Descriptive Paragraph (check why all the months in y axis are messed up)
+```{r}
+
+```
+
+## Combining the plots together
+```{r}
+
+```
+## Problem 3
+Cleaning participant demographic data 
+```{r}
+mimsparticipant_df=
+  read_csv ("/Users/gorgeous/p8105_hw3_nrl2142/Data/nhanes_covar.csv", skip=5, col_names=c("seqn", "gender", "age", "bmi", "education"), na = c("NA", ".",""))|>
+  janitor::clean_names()|>
+  mutate(
+    gender = factor(gender, levels =c(1,2),
+                    labels = c("male", "female")),
+    education = factor(education, levels = c(1,2,3),
+                       labels = c("less than high school", "high school equivalent", "more than high school")))|>
+  filter(age>21,
+         !is.na(gender),
+         !is.na(age),
+         !is.na(bmi),
+         !is.na(education))
+  
+
+mimsparticipant_df
+```
+
+Cleaning accelerometer data 
+```{r}
+mimsaccel_df= 
+  read_csv ("/Users/gorgeous/p8105_hw3_nrl2142/Data/nhanes_accel.csv",na = c("NA", ".",""))|>
+  janitor:: clean_names()
+
+mimsaccel_df
+```
+
+Joining bothdatasets 
+```{r}
+combinedmims_df =
+left_join(mimsparticipant_df, mimsaccel_df, by = "seqn")
+
+combinedmims_df
+```
+
+Produce a reader-friendly table for the number of men and women in each education category, and create a visualization of the age distributions for men and women in each education category. Comment on these items.
+```{r}
+grouped_df =
+  combinedmims_df |>
+  select(gender,education) |>
+  group_by(education)|>
+  count(gender)
+
+grouped_df
+
+agedistributionplot=
+  combinedmims_df |>
+  select(gender,education,age) |>
+  group_by(education,age)|>
+  count(gender) |>
+ggplot(aes(x=education, y=age, fill = gender))+
+  geom_boxplot(alpha =0.5)+
+  labs(
+    title = "Age Distributions by Gender and Education Category",
+    x = "Education Category",
+    y = "Age",
+    fill = "Gender")
+
+agedistributionplot
+
+```
+## Short Description 
+The boxplot shows that median age increases with education level for both men and women. Across education groups, male participants in the NHANES study tend to be older. Within gender, women with high school equivalent education has the highest median age, while men with less than high school equivalent education has the highest median age. Across all education levels, age does not seem to be normally distributed. Nevertheless, there also appears to be no outliers.
+
+Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.
+```{r}
+
+```
+Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences
 ```{r}
 
 ```
