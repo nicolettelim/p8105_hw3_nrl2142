@@ -141,15 +141,6 @@ zipcoderental_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_
   select(zori,year,month,region_name,county_name)|>
   group_by(month,region_name, county_name)
 
-  ggplot(zipcoderental_df, aes(x = year, y = zori, group = region_name, color = county_name))+
-         geom_line (alpha = 0.6)+
-         labs(
-           title = "NYC Rental Prices within Zip Code Across Years",
-           x = "Year",
-           y = "Rental Price",
-           color = "Borough")
-  
-"I don't get a plot if I do it the following way like shown in lecture, why:"
 zipcoderentalplot =
   zipcoderental_df|>
 ggplot(aes(x = year, y = zori, group = region_name, color = county_name))+
@@ -199,9 +190,10 @@ zipcoderental2023plot
 
 ```
 
-## Combining the plots together
+## Combining the plots together (remember to save plot after checking)
 ```{r}
-
+zipcoderentalplot+zipcoderental2023plot
+ggsave("results/problem2plots.png")
 ```
 ## Problem 3
 Cleaning participant demographic data 
@@ -270,13 +262,54 @@ agedistributionplot
 ## Short Description 
 The boxplot shows that median age increases with education level for both men and women. Across education groups, male participants in the NHANES study tend to be older. Within gender, women with high school equivalent education has the highest median age, while men with less than high school equivalent education has the highest median age. Across all education levels, age does not seem to be normally distributed. Nevertheless, there also appears to be no outliers.
 
-Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.
 ```{r}
+totalactivity_df =
+  combinedmims_df |>
+  pivot_longer(
+    cols = starts_with ("min"),
+    names_to = "minute",
+    values_to = "activity") |>
+  group_by(seqn, age, gender, education) |>
+  summarise (total_activity = mean(activity, na.rm = TRUE))
 
+totalactivity_df
+
+ggplot(totalactivity_df, aes(x = age, y=total_activity, color = gender)) + 
+  geom_point (alpha = 0.6) +
+  geom_smooth(se = FALSE) +
+  facet_grid (~education) +
+  labs (
+    title = "Total Activity vs Age by Gender and Education Level",
+    x = "Age",
+    y = "Total Activity",
+    color = "Gender")
 ```
+## Short Description 
+Among participants with less than high school education, there is a clear decline in total activity as age increases regardless of gender. Among participants with high school equivalent education, females tend to have higher total activity than males even as age increases. Among participants with more than high school education, activity levels are more stable across age although females tend to generally have higher activity levels than males. 
+
 Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences
 ```{r}
+onedaytotalactivity_df =
+   combinedmims_df |>
+  pivot_longer(
+    cols = starts_with ("min"),
+    names_to = "minute",
+    values_to = "activity") |>
+  group_by(seqn, age, gender, education) |>
+  summarise (oneday_activity = sum(activity, na.rm = TRUE))
 
+onedaytotalactivity_df
+
+ggplot(onedaytotalactivity_df, aes(x = age, y=oneday_activity, color = gender)) + 
+  geom_point (alpha = 0.6) +
+  geom_smooth(se = FALSE) +
+  facet_grid (~education) +
+  labs (
+    title = "24-hour Total Activity vs Age by Gender and Education Level",
+    x = "Age",
+    y = "Total Activity in a Day (24 hours)",
+    color = "Gender")
 ```
 
+##Short Description (check if graph is supposed to look the same as earlier part)
 
