@@ -52,8 +52,8 @@ targetaisles_df =
    group_by(product_name, aisle) |>
   summarise(item_count =n ())|>
   arrange (aisle, desc(item_count)) |>
-  group_by(aisle) |>
-  slice_max(product_name, n=3) |>
+  group_by (aisle) |>
+  slice_max(item_count, n=3) |>
   drop_na() 
 
 targetaisles_df
@@ -100,7 +100,8 @@ zip_under_10 = sum(n <10))
 
 zorizipcount_df
 ```
-## Short description (double check if I really don't have any zipcodes less than 10)
+## Short description
+Between January 2015 and August 2024, 149 zipcodes were observed 116 times. 0 zipcodes were observed fewer than 10 times. Zipcodes that are observed more than others could be due to the high concentration of residential properties which increases its likelihood of being reflected in Zillow's rental data. 
 
 ```{r}
 zorirental_df=
@@ -117,7 +118,8 @@ zorirental_df=
   drop_na(zori)|>
   select(zori,county_name,year)|>
   group_by(county_name, year) |>
-  summarise(mean_value = mean(zori), na.rm = TRUE)
+  summarise(mean_value = mean(zori), na.rm = TRUE) |>
+  select (-na.rm)
 
 zorirental_df
   
@@ -145,14 +147,17 @@ zipcoderentalplot =
   zipcoderental_df|>
 ggplot(aes(x = year, y = zori, group = region_name, color = county_name))+
          geom_line (alpha = 0.6)+
+         facet_wrap (~ county_name)+
          labs(
            title = "NYC Rental Prices within Zip Code Across Years",
            x = "Year",
            y = "Rental Price",
            color = "Borough")
-```
-## Short Descriptive Paragraph (on significant elements. double check graph before writing)
 
+zipcoderentalplot
+```
+## Short Descriptive Paragraph
+Generally, rental prices have increased across all boroughs from 2015 to 2024. Notably, New York County and Kings County have experienced the greatest variation in rental hikes from 2015 to 2024. 
 
 Zip code rental plot over each month in 2023
 ```{r}
@@ -165,7 +170,7 @@ zipcoderental2023_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zil
     names_prefix ="x") |>
   separate(date, into = c("year", "month", "day"), sep = "_") |>
   mutate (year = as.integer(year),
-          month = month.name [as.numeric (month)]) |>
+          month = factor(month.name [as.numeric (month)], levels = month.name)) |>
   filter(year == 2023) |>
   drop_na(zori)|>
   select(zori,year,month,region_name,county_name)|>
@@ -173,11 +178,11 @@ zipcoderental2023_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zil
   summarise(mean_value = mean(zori), na.rm = TRUE)
 
 zipcoderental2023plot=
-  ggplot(zipcoderental2023_df, (aes(x = month, y = mean_value, group = region_name, color = county_name)))+
-         geom_line (alpha = 0.6)+
+  ggplot(zipcoderental2023_df, (aes(x = county_name, y = mean_value, fill = county_name)))+
+         geom_boxplot (alpha = 0.6)+
          labs(
            title = "NYC Rental Prices by Zip Code Across Months in 2023",
-           x = "Month",
+           x = "Borough",
            y = "Average Rental Price",
            color = "Borough")
 
@@ -185,15 +190,13 @@ zipcoderental2023plot=
 
 zipcoderental2023plot
 ```
-## Short Descriptive Paragraph (check why all the months in y axis are messed up)
-```{r}
+## Short Descriptive Paragraph 
+In 2023, New York County had the highest average rent among all boroughs and the greatest variation in rental prices. Out of all the boroughs, the distribution of rental prices in Richmond County appears to be the most symmetric as both tails appear equal in size and it lacks visible outliers. To ascertain normality, a histogram or Q-Q plot should be plotted. 
 
-```
-
-## Combining the plots together (remember to save plot after checking)
+## Combining the plots together
 ```{r}
-zipcoderentalplot+zipcoderental2023plot
-ggsave("results/problem2plots.png")
+zipcoderentalplot/zipcoderental2023plot
+ggsave("results/problem2plots.png", width = 8, height =12)
 ```
 ## Problem 3
 Cleaning participant demographic data 
@@ -233,7 +236,6 @@ left_join(mimsparticipant_df, mimsaccel_df, by = "seqn")
 combinedmims_df
 ```
 
-Produce a reader-friendly table for the number of men and women in each education category, and create a visualization of the age distributions for men and women in each education category. Comment on these items.
 ```{r}
 grouped_df =
   combinedmims_df |>
@@ -287,7 +289,6 @@ ggplot(totalactivity_df, aes(x = age, y=total_activity, color = gender)) +
 ## Short Description 
 Among participants with less than high school education, there is a clear decline in total activity as age increases regardless of gender. Among participants with high school equivalent education, females tend to have higher total activity than males even as age increases. Among participants with more than high school education, activity levels are more stable across age although females tend to generally have higher activity levels than males. 
 
-Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences
 ```{r}
 onedaytotalactivity_df =
    combinedmims_df |>
@@ -295,21 +296,24 @@ onedaytotalactivity_df =
     cols = starts_with ("min"),
     names_to = "minute",
     values_to = "activity") |>
-  group_by(seqn, age, gender, education) |>
-  summarise (oneday_activity = sum(activity, na.rm = TRUE))
+  mutate (
+    minute = as.numeric (sub("min", "", minute)),
+    hour = minute/60) |>
+  group_by(hour, gender, education) |>
+  summarise (mean_activity = mean(activity, na.rm = TRUE), .groups = "drop")
 
 onedaytotalactivity_df
 
-ggplot(onedaytotalactivity_df, aes(x = age, y=oneday_activity, color = gender)) + 
+ggplot(onedaytotalactivity_df, aes(x=hour, y=mean_activity, color=gender)) + 
   geom_point (alpha = 0.6) +
   geom_smooth(se = FALSE) +
   facet_grid (~education) +
   labs (
-    title = "24-hour Total Activity vs Age by Gender and Education Level",
-    x = "Age",
-    y = "Total Activity in a Day (24 hours)",
+    title = "24-hour Total Activity by Gender and Education Level",
+    x = "Hour of Day",
+    y = "Mean Activity",
     color = "Gender")
 ```
-
-##Short Description (check if graph is supposed to look the same as earlier part)
+## Short Description
+Across all education levels, both males and females tend to be the most active around late morning to the evening (i.e. 10 am to approximately 7pm). According to the plot, females generally tend to be more active than males across all education levels, specifically in the 'more than high school education status' where there is a distinct difference in the peaks of mean activity between men and women. 
 
