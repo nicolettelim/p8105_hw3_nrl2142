@@ -50,11 +50,12 @@ targetaisles_df =
   select (aisle, product_name)|>
   filter(aisle == c("baking ingredients", "dog food care", "packaged vegetables fruits")) |>
    group_by(product_name, aisle) |>
-  summarise(item_count =n ())|>
+  summarise(item_count =n())|>
   arrange (aisle, desc(item_count)) |>
   group_by (aisle) |>
-  slice_max(item_count, n=3) |>
-  drop_na() 
+  slice_max(item_count, n=3)|>
+  drop_na() |>
+  knitr::kable()
 
 targetaisles_df
   
@@ -79,7 +80,8 @@ orderhour_df <- instacart |>
   pivot_wider(
     names_from = order_dow,
     values_from = mean_value
-  )
+  ) |>
+  knitr::kable()
 orderhour_df
 ```
 
@@ -119,13 +121,14 @@ zorirental_df=
   select(zori,county_name,year)|>
   group_by(county_name, year) |>
   summarise(mean_value = mean(zori), na.rm = TRUE) |>
-  select (-na.rm)
+  select (-na.rm) |>
+  knitr::kable()
 
 zorirental_df
   
 ```
-## Short descriptive paragraph 
-Overall, rental prices are increasing across all boroughs in New York from the years 2015 to 2024. The borough that experienced the steepest increase in rental prices is Manhatten with a rent increase of 1056.398, followed by the Bronx with an incrwase of 737.301. This could potentially be due to reasons such as increasing gentrification, inflation or the general appeal to bein close proximity to Manhatten due to the availability of employment opportunities. 
+## Short description
+Overall, rental prices are increasing across all boroughs in New York from the years 2015 to 2024. The borough that experienced the steepest increase in rental prices is Manhattan with a rent increase of 1056.398, followed by the Bronx with an increase of 737.301. This could potentially be due to reasons such as increasing gentrification, inflation or the general appeal to being close proximity to Manhattan due to the availability of employment opportunities. 
 
 Zip code rental plot all available years 
 ```{r}
@@ -156,7 +159,8 @@ ggplot(aes(x = year, y = zori, group = region_name, color = county_name))+
 
 zipcoderentalplot
 ```
-## Short Descriptive Paragraph
+
+## Short Description
 Generally, rental prices have increased across all boroughs from 2015 to 2024. Notably, New York County and Kings County have experienced the greatest variation in rental hikes from 2015 to 2024. 
 
 Zip code rental plot over each month in 2023
@@ -190,10 +194,11 @@ zipcoderental2023plot=
 
 zipcoderental2023plot
 ```
-## Short Descriptive Paragraph 
+
+## Short Description
 In 2023, New York County had the highest average rent among all boroughs and the greatest variation in rental prices. Out of all the boroughs, the distribution of rental prices in Richmond County appears to be the most symmetric as both tails appear equal in size and it lacks visible outliers. To ascertain normality, a histogram or Q-Q plot should be plotted. 
 
-## Combining the plots together
+Combining the plots together
 ```{r}
 zipcoderentalplot/zipcoderental2023plot
 ggsave("results/problem2plots.png", width = 8, height =12)
@@ -241,7 +246,8 @@ grouped_df =
   combinedmims_df |>
   select(gender,education) |>
   group_by(education)|>
-  count(gender)
+  count(gender) |>
+  knitr::kable()
 
 grouped_df
 
@@ -261,6 +267,7 @@ ggplot(aes(x=education, y=age, fill = gender))+
 agedistributionplot
 
 ```
+
 ## Short Description 
 The boxplot shows that median age increases with education level for both men and women. Across education groups, male participants in the NHANES study tend to be older. Within gender, women with high school equivalent education has the highest median age, while men with less than high school equivalent education has the highest median age. Across all education levels, age does not seem to be normally distributed. Nevertheless, there also appears to be no outliers.
 
@@ -286,6 +293,7 @@ ggplot(totalactivity_df, aes(x = age, y=total_activity, color = gender)) +
     y = "Total Activity",
     color = "Gender")
 ```
+ 
 ## Short Description 
 Among participants with less than high school education, there is a clear decline in total activity as age increases regardless of gender. Among participants with high school equivalent education, females tend to have higher total activity than males even as age increases. Among participants with more than high school education, activity levels are more stable across age although females tend to generally have higher activity levels than males. 
 
@@ -314,6 +322,7 @@ ggplot(onedaytotalactivity_df, aes(x=hour, y=mean_activity, color=gender)) +
     y = "Mean Activity",
     color = "Gender")
 ```
+
 ## Short Description
 Across all education levels, both males and females tend to be the most active around late morning to the evening (i.e. 10 am to approximately 7pm). According to the plot, females generally tend to be more active than males across all education levels, specifically in the 'more than high school education status' where there is a distinct difference in the peaks of mean activity between men and women. 
 
