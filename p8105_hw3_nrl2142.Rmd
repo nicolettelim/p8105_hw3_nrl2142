@@ -88,7 +88,7 @@ orderhour_df
 ## Problem 2
 ```{r}
 zorizipcount_df =
-  zorizipcount_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
+  zorizipcount_df = read_csv ("Data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
   janitor::clean_names() |>
    pivot_longer (
   cols = x2015_01_31:x2024_08_31,
@@ -107,7 +107,7 @@ Between January 2015 and August 2024, 149 zipcodes were observed 116 times. 0 zi
 
 ```{r}
 zorirental_df=
- zorirental_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
+ zorirental_df = read_csv ("Data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
   janitor::clean_names() |>
    pivot_longer (
   cols = x2015_01_31:x2024_08_31,
@@ -132,7 +132,7 @@ Overall, rental prices are increasing across all boroughs in New York from the y
 
 Zip code rental plot all available years 
 ```{r}
-zipcoderental_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
+zipcoderental_df = read_csv ("Data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
   janitor::clean_names() |>
    pivot_longer (
   cols = x2015_01_31:x2024_08_31,
@@ -165,7 +165,7 @@ Generally, rental prices have increased across all boroughs from 2015 to 2024. N
 
 Zip code rental plot over each month in 2023
 ```{r}
-zipcoderental2023_df = read_csv ("/Users/gorgeous/p8105_hw2_nrl2142/hw2_data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
+zipcoderental2023_df = read_csv ("Data/zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv",na = c("NA", ".","")) |>
   janitor::clean_names() |>
    pivot_longer (
   cols = x2015_01_31:x2024_08_31,
@@ -207,7 +207,7 @@ ggsave("results/problem2plots.png", width = 8, height =12)
 Cleaning participant demographic data 
 ```{r}
 mimsparticipant_df=
-  read_csv ("/Users/gorgeous/p8105_hw3_nrl2142/Data/nhanes_covar.csv", skip=5, col_names=c("seqn", "gender", "age", "bmi", "education"), na = c("NA", ".",""))|>
+  read_csv ("Data/nhanes_covar.csv", skip=5, col_names=c("seqn", "gender", "age", "bmi", "education"), na = c("NA", ".",""))|>
   janitor::clean_names()|>
   mutate(
     gender = factor(gender, levels =c(1,2),
@@ -227,7 +227,7 @@ mimsparticipant_df
 Cleaning accelerometer data 
 ```{r}
 mimsaccel_df= 
-  read_csv ("/Users/gorgeous/p8105_hw3_nrl2142/Data/nhanes_accel.csv",na = c("NA", ".",""))|>
+  read_csv ("Data/nhanes_accel.csv",na = c("NA", ".",""))|>
   janitor:: clean_names()
 
 mimsaccel_df
